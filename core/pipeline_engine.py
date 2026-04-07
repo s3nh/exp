@@ -293,8 +293,14 @@ def _try_parse_json(text: str) -> tuple[dict[str, Any] | None, str]:
     cleaned = text.strip()
     if cleaned.startswith("```"):
         lines = cleaned.splitlines()
-        end = -1 if lines[-1].strip() == "```" else len(lines)
-        cleaned = "\n".join(lines[1:end])
+        # Find the closing fence explicitly (may not be the last line)
+        start = 1
+        end = len(lines)
+        for i in range(len(lines) - 1, 0, -1):
+            if lines[i].strip() == "```":
+                end = i
+                break
+        cleaned = "\n".join(lines[start:end])
     try:
         result = json.loads(cleaned)
         if isinstance(result, dict):
