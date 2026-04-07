@@ -1,0 +1,27 @@
+country: DE
+process: consumer_credit
+business_unit: retail_credit
+pipeline_config: "configs/pipelines/single_doc_extraction.yaml"
+
+condition_files:
+  - document_freshness
+  - cross_document
+
+required_categories:
+  - category: income_proof
+    doc_types: ["salary_slip"]
+    min_required: 1
+    max_accepted: 6
+    description: "Income proof documents (salary slips)"
+
+  - category: identity
+    doc_types: ["identity_document"]
+    min_required: 1
+    max_accepted: 2
+    description: "Identity documents"
+
+  - category: application
+    doc_types: ["loan_application"]
+    min_required: 1
+    max_accepted: 1
+    description: "Loan application form"

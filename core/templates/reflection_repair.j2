@@ -1,0 +1,25 @@
+A pipeline step failed and needs self-correction.
+
+## Failed Step
+**Step**: {{ failed_step_name }}
+
+## Original Prompt
+{{ original_prompt }}
+
+## Your Previous Response (which failed)
+{{ raw_response }}
+
+## Errors Found
+{% for error in errors %}
+- {{ error }}
+{% endfor %}
+
+## Context
+{% for key, value in context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+
+## Instructions
+Please correct your response. The previous response had the errors listed above.
+Ensure your response is valid JSON matching the expected format.
+Respond with corrected JSON ONLY.

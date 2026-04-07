@@ -1,0 +1,51 @@
+schema_version: "1.0"
+country: DE
+business_unit: retail_credit
+document_type: bank_statement
+fields:
+  - name: bank_name
+    type: string
+    required: true
+    alias: ["Bank", "Kreditinstitut"]
+  - name: account_holder
+    type: string
+    required: true
+    alias: ["Kontoinhaber", "Name"]
+  - name: iban
+    type: string
+    required: true
+    alias: ["IBAN", "Kontonummer"]
+  - name: bic
+    type: string
+    alias: ["BIC", "SWIFT"]
+  - name: statement_date
+    type: string
+    required: true
+    alias: ["Datum", "Auszugsdatum", "Stand"]
+  - name: opening_balance
+    type: float
+    alias: ["Anfangssaldo", "Eröffnungssaldo"]
+    currency: EUR
+  - name: closing_balance
+    type: float
+    required: true
+    alias: ["Schlusssaldo", "Endsaldo", "Saldo"]
+    currency: EUR
+  - name: total_credits
+    type: float
+    alias: ["Gesamtgutschriften", "Eingänge"]
+    currency: EUR
+  - name: total_debits
+    type: float
+    alias: ["Gesamtbelastungen", "Ausgänge"]
+    currency: EUR
+  - name: statement_period_start
+    type: string
+    alias: ["Von", "Zeitraum von"]
+  - name: statement_period_end
+    type: string
+    alias: ["Bis", "Zeitraum bis"]
+rules:
+  - condition: "closing_balance < -10000"
+    action: "flag_for_review"
+    severity: warning

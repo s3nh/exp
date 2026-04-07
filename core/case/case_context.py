@@ -7,16 +7,19 @@ from enum import Enum
 
 from core.context import PipelineContext
 
+NEEDS_MANUAL_CLASSIFICATION = "NEEDS_MANUAL_CLASSIFICATION"
+UNKNOWN_DOCUMENT_TYPE = "unknown_document"
+
 
 class CaseStatus(Enum):
     INTAKE = "intake"
-    EXTRACTION = "extraction"
-    CROSS_VALIDATION = "cross_validation"
-    ANALYSIS = "analysis"
-    DECISION = "decision"
-    HUMAN_REVIEW = "human_review"
-    COMPLETED = "completed"
-    REJECTED = "rejected"
+    CLASSIFYING = "classifying"
+    CHECKING_COMPLETENESS = "checking_completeness"
+    EXTRACTING = "extracting"
+    CHECKING_CONDITIONS = "checking_conditions"
+    GENERATING_REPORT = "generating_report"
+    READY_FOR_REVIEW = "ready_for_review"
+    NEEDS_ANALYST_ACTION = "needs_analyst_action"
 
 
 class DocumentStatus(Enum):
@@ -29,7 +32,7 @@ class DocumentStatus(Enum):
 
 @dataclass
 class DocumentEntry:
-    """A single document within a credit case."""
+    """A single document within a case."""
     doc_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     doc_type: str = ""
     category: str = ""
@@ -58,40 +61,44 @@ class CrossValidationResult:
 
 
 @dataclass
-class FinancialAnalysis:
-    """Aggregated financial analysis across all documents."""
-    declared_monthly_income: float | None = None
-    verified_monthly_income: float | None = None
-    income_sources: list[dict[str, Any]] = field(default_factory=list)
-    income_confidence: float = 0.0
-    total_monthly_debt_service: float | None = None
-    declared_debts: list[dict[str, Any]] = field(default_factory=list)
-    bureau_debts: list[dict[str, Any]] = field(default_factory=list)
-    undeclared_debts: list[dict[str, Any]] = field(default_factory=list)
-    dti_ratio: float | None = None
-    dscr: float | None = None
-    ltv_ratio: float | None = None
-    financial_spreading: dict[str, Any] = field(default_factory=dict)
-    flags: list[str] = field(default_factory=list)
-    reasoning: dict[str, str] = field(default_factory=dict)
+class ClassificationResult:
+    doc_id: str
+    detected_type: str
+    confidence: float
+    alternative_types: list[dict[str, Any]]
+    reasoning: str
+    manually_overridden: bool = False
+    override_by: str | None = None
 
 
 @dataclass
-class CreditDecision:
-    """Final credit decision output."""
-    decision: str = ""
-    confidence: float = 0.0
-    rationale: str = ""
-    conditions: list[str] = field(default_factory=list)
-    risk_grade: str = ""
-    flags: list[str] = field(default_factory=list)
-    human_review_reasons: list[str] = field(default_factory=list)
+class ConditionCheckResult:
+    condition_name: str
+    status: str  # "pass" | "fail" | "needs_review"
+    severity: str  # "error" | "warning" | "info"
+    analyst_message: str
+    details: dict[str, Any]
+    sources_used: list[str]
+    check_type: str  # "deterministic" | "llm_assisted"
+
+
+@dataclass
+class ReviewReport:
+    case_id: str
+    generated_at: str
+    document_inventory: list[dict[str, Any]]
+    extraction_results: dict[str, Any]
+    condition_results: list[ConditionCheckResult]
+    flagged_issues: list[dict[str, Any]]
+    narrative_summary: str
+    recommendations: list[str]
+    requires_analyst_attention: bool
 
 
 @dataclass
 class CaseContext:
     """
-    Top-level context for a multi-document credit case.
+    Top-level context for a multi-document analyst review case.
     """
     case_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     country: str = ""
@@ -101,10 +108,12 @@ class CaseContext:
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
     documents: dict[str, DocumentEntry] = field(default_factory=dict)
-    cross_validations: list[CrossValidationResult] = field(default_factory=list)
-    financial_analysis: FinancialAnalysis = field(default_factory=FinancialAnalysis)
-    credit_decision: CreditDecision | None = None
+    classifications: dict[str, ClassificationResult] = field(default_factory=dict)
+    condition_results: list[ConditionCheckResult] = field(default_factory=list)
+    review_report: ReviewReport | None = None
     phase_traces: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    # Kept for backward compatibility with cross_doc modules
+    cross_validations: list[CrossValidationResult] = field(default_factory=list)
 
     def add_document(self, entry: DocumentEntry) -> None:
         self.documents[entry.doc_id] = entry
@@ -137,13 +146,13 @@ class CaseContext:
     @property
     def has_blocking_flags(self) -> bool:
         return any(
-            cv.action == "block" and not cv.passed
-            for cv in self.cross_validations
+            r.severity == "error" and r.status == "fail"
+            for r in self.condition_results
         )
 
     @property
     def needs_human_review(self) -> bool:
         return any(
-            cv.action in ("flag_for_review", "escalate") and not cv.passed
-            for cv in self.cross_validations
+            r.status == "needs_review"
+            for r in self.condition_results
         )

@@ -1,0 +1,34 @@
+You are an analyst assistant performing a cross-document consistency check.
+
+## Condition
+**Name**: {{ condition.name }}
+**Description**: {{ condition.description }}
+**Source Documents**: {{ condition.sources | join(", ") }}
+{% if condition.llm_logic %}**Logic**: {{ condition.llm_logic }}{% endif %}
+
+## Data From Each Source Document
+{% for doc_type, docs in relevant_data.items() %}
+### {{ doc_type }}
+{% for doc in docs %}
+{{ doc | tojson(indent=2) }}
+{% endfor %}
+{% endfor %}
+
+{% if previous_results %}
+## Previous Check Results (for context)
+{% for key, value in previous_results.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+## Instructions
+Compare data across documents to check consistency.
+Respond with a JSON object ONLY:
+{
+  "status": "pass" | "fail" | "needs_review",
+  "analyst_message": "<specific finding for the analyst>",
+  "details": {
+    "comparison_summary": "<what was compared>",
+    "discrepancies": []
+  }
+}

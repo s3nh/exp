@@ -1,0 +1,16 @@
+# Per-country classification rules template
+# Superseded by configs/countries/{country}/classification.yaml per-country
+schema_version: "1.0"
+description: >
+  This template shows the structure for country-specific classification configs.
+  Copy to configs/countries/{country}/classification.yaml and populate.
+
+country: TEMPLATE
+document_types:
+  - name: example_document
+    description: "Human-readable description of document type"
+    key_indicators: ["keyword1", "keyword2"]
+    confidence_boost_keywords: ["strong_keyword"]
+
+classification_fallback: "unknown_document"
+confidence_threshold: 0.75

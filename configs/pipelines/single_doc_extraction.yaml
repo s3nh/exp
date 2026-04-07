@@ -1,0 +1,11 @@
+name: single_doc_extraction
+backend_key: default
+
+steps:
+  - name: extract_fields
+    prompt_template: extraction_base.j2
+    retry_on_failure: true
+    max_retries: 3
+    use_reflection: true
+    temperature: 0.0
+    inject_previous_results: false

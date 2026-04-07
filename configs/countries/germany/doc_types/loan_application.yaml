@@ -1,0 +1,49 @@
+schema_version: "1.0"
+country: DE
+business_unit: retail_credit
+document_type: loan_application
+fields:
+  - name: applicant_name
+    type: string
+    required: true
+    alias: ["Antragsteller", "Name des Antragstellers"]
+  - name: loan_amount
+    type: float
+    required: true
+    alias: ["Darlehensbetrag", "Kreditbetrag", "Gewünschter Betrag"]
+    currency: EUR
+  - name: loan_purpose
+    type: string
+    required: true
+    alias: ["Verwendungszweck", "Zweck des Darlehens"]
+  - name: loan_term_months
+    type: integer
+    alias: ["Laufzeit", "Laufzeit in Monaten"]
+  - name: requested_monthly_rate
+    type: float
+    alias: ["Gewünschte Monatsrate", "Rate"]
+    currency: EUR
+  - name: application_date
+    type: string
+    required: true
+    alias: ["Antragsdatum", "Datum"]
+  - name: applicant_address
+    type: string
+    alias: ["Adresse", "Anschrift"]
+  - name: applicant_dob
+    type: string
+    alias: ["Geburtsdatum des Antragstellers"]
+  - name: employer_name
+    type: string
+    alias: ["Arbeitgeber", "Arbeitgebername"]
+  - name: declared_monthly_income
+    type: float
+    alias: ["Monatliches Nettoeinkommen", "Nettoeinkommen"]
+    currency: EUR
+  - name: signature_present
+    type: boolean
+    alias: ["Unterschrift vorhanden"]
+rules:
+  - condition: "not signature_present"
+    action: "flag_for_review"
+    severity: warning

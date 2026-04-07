@@ -1,10 +1,9 @@
 from __future__ import annotations
 import hashlib
 import logging
-from dataclasses import dataclass, field
-from typing import Any
 import yaml
 
+from core.guardrails.verdict import GuardrailVerdict
 from core.guardrails.input_guards import InputGuardChain
 from core.guardrails.output_guards import OutputGuardChain
 from core.guardrails.pii import PIIScanner
@@ -12,15 +11,6 @@ from core.guardrails.injection import InjectionDetector
 from core.context import PipelineContext
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class GuardrailVerdict:
-    passed: bool
-    flags: list[str] = field(default_factory=list)
-    blocked_reason: str | None = None
-    sanitized_text: str | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class GuardrailEngine:

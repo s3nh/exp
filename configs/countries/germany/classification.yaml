@@ -1,0 +1,63 @@
+schema_version: "1.0"
+country: DE
+document_types:
+  - name: salary_slip
+    description: "Monthly salary slip / payslip from an employer"
+    key_indicators:
+      - "Lohnabrechnung"
+      - "Gehaltsabrechnung"
+      - "Nettolohn"
+      - "Bruttolohn"
+      - "Nettogehalt"
+    confidence_boost_keywords:
+      - "Sozialversicherung"
+      - "Arbeitnehmer"
+
+  - name: bank_statement
+    description: "Bank account statement showing transactions and balances"
+    key_indicators:
+      - "Kontoauszug"
+      - "IBAN"
+      - "BIC"
+      - "Saldo"
+      - "Kreditinstitut"
+    confidence_boost_keywords:
+      - "Anfangssaldo"
+      - "Schlusssaldo"
+
+  - name: tax_return
+    description: "Annual income tax return or tax assessment notice"
+    key_indicators:
+      - "Einkommensteuerbescheid"
+      - "Steuernummer"
+      - "Finanzamt"
+      - "Veranlagungsjahr"
+    confidence_boost_keywords:
+      - "Gesamteinkünfte"
+      - "Festgesetzte Einkommensteuer"
+
+  - name: identity_document
+    description: "German national identity card or passport"
+    key_indicators:
+      - "Personalausweis"
+      - "Reisepass"
+      - "Ablaufdatum"
+      - "Geburtsdatum"
+      - "Staatsangehörigkeit"
+    confidence_boost_keywords:
+      - "Ausstellungsbehörde"
+      - "Bundesrepublik Deutschland"
+
+  - name: loan_application
+    description: "Loan or credit application form"
+    key_indicators:
+      - "Kreditantrag"
+      - "Darlehensantrag"
+      - "Darlehensbetrag"
+      - "Verwendungszweck"
+    confidence_boost_keywords:
+      - "Antragsteller"
+      - "Monatsrate"
+
+classification_fallback: "unknown_document"
+confidence_threshold: 0.75
