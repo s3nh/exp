@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 import yaml
 
-from core.case.case_context import ClassificationResult
+from core.case.case_context import ClassificationResult, NEEDS_MANUAL_CLASSIFICATION
 from core.context import PipelineContext
 from core.guardrails.engine import GuardrailEngine
 from core.inference import InferenceRouter
@@ -13,7 +13,7 @@ from core.prompt_compiler import PromptCompiler
 
 logger = logging.getLogger(__name__)
 
-NEEDS_MANUAL = "NEEDS_MANUAL_CLASSIFICATION"
+NEEDS_MANUAL = NEEDS_MANUAL_CLASSIFICATION
 
 
 class DocumentClassifier:
@@ -124,7 +124,13 @@ class DocumentClassifier:
             text = response_text.strip()
             if text.startswith("```"):
                 lines = text.splitlines()
-                text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+                start = 1
+                end = len(lines)
+                for i in range(len(lines) - 1, 0, -1):
+                    if lines[i].strip() == "```":
+                        end = i
+                        break
+                text = "\n".join(lines[start:end])
             data = json.loads(text)
         except json.JSONDecodeError as exc:
             logger.warning("[%s] Failed to parse classification JSON: %s", doc_id, exc)

@@ -346,7 +346,13 @@ class ConditionChecker:
             text = response_text.strip()
             if text.startswith("```"):
                 lines = text.splitlines()
-                text = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+                start = 1
+                end = len(lines)
+                for i in range(len(lines) - 1, 0, -1):
+                    if lines[i].strip() == "```":
+                        end = i
+                        break
+                text = "\n".join(lines[start:end])
             data = json.loads(text)
         except json.JSONDecodeError as exc:
             return ConditionCheckResult(

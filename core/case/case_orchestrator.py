@@ -11,6 +11,8 @@ from core.case.case_context import (
     DocumentEntry,
     DocumentStatus,
     ClassificationResult,
+    NEEDS_MANUAL_CLASSIFICATION,
+    UNKNOWN_DOCUMENT_TYPE,
 )
 from core.case.dependency_graph import DocumentGraph, CompletenessChecker
 from core.classification.classifier import DocumentClassifier
@@ -180,7 +182,7 @@ class CaseOrchestrator:
             case.classifications[result.doc_id] = result
             if result.doc_id in case.documents:
                 doc = case.documents[result.doc_id]
-                if result.detected_type != "NEEDS_MANUAL_CLASSIFICATION":
+                if result.detected_type != NEEDS_MANUAL_CLASSIFICATION:
                     doc.doc_type = result.detected_type
 
     def _check_completeness(
@@ -238,7 +240,7 @@ class CaseOrchestrator:
             return
 
         for doc_id, doc in case.documents.items():
-            if doc.doc_type in ("", "NEEDS_MANUAL_CLASSIFICATION", "unknown_document"):
+            if doc.doc_type in ("", NEEDS_MANUAL_CLASSIFICATION, UNKNOWN_DOCUMENT_TYPE):
                 logger.warning(
                     "[%s] Skipping extraction for unclassified doc %s",
                     case.case_id,
@@ -293,7 +295,12 @@ class CaseOrchestrator:
 
 def _load_process_config(path: str) -> dict[str, Any]:
     """Load process config YAML, returning empty dict if not found."""
-    p = Path(path)
+    p = Path(path).resolve()
+    configs_base = Path("configs").resolve()
+    # Guard against path traversal attacks
+    if not str(p).startswith(str(configs_base)):
+        logger.warning("Process config path outside configs dir: %s", path)
+        return {}
     if not p.exists():
         logger.warning("Process config not found: %s", path)
         return {}

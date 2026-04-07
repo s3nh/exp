@@ -8,6 +8,7 @@ from core.case.case_context import (
     ConditionCheckResult,
     ReviewReport,
     DocumentStatus,
+    NEEDS_MANUAL_CLASSIFICATION,
 )
 from core.context import PipelineContext
 from core.guardrails.engine import GuardrailEngine
@@ -146,7 +147,7 @@ class ReviewReportBuilder:
         unclassified = [
             doc_id
             for doc_id, clf in case.classifications.items()
-            if clf.detected_type == "NEEDS_MANUAL_CLASSIFICATION"
+            if clf.detected_type == NEEDS_MANUAL_CLASSIFICATION
         ]
         if unclassified:
             recommendations.append(

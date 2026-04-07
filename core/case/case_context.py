@@ -7,6 +7,9 @@ from enum import Enum
 
 from core.context import PipelineContext
 
+NEEDS_MANUAL_CLASSIFICATION = "NEEDS_MANUAL_CLASSIFICATION"
+UNKNOWN_DOCUMENT_TYPE = "unknown_document"
+
 
 class CaseStatus(Enum):
     INTAKE = "intake"

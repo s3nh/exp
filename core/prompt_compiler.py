@@ -1,9 +1,19 @@
 from __future__ import annotations
+import re
 from dataclasses import dataclass, field
 from typing import Any
 from pathlib import Path
 import yaml
 from jinja2 import Environment, FileSystemLoader
+
+_SAFE_COMPONENT_RE = re.compile(r'^[a-zA-Z0-9_\-]+$')
+
+
+def _sanitize_path_component(value: str) -> str:
+    """Ensure a path component contains only safe characters (no traversal)."""
+    if not _SAFE_COMPONENT_RE.match(value):
+        raise ValueError(f"Unsafe path component: {value!r}")
+    return value
 
 
 @dataclass
@@ -46,10 +56,13 @@ class PromptCompiler:
     def load_schema(self, country: str, doc_type: str) -> ExtractionSchema:
         cache_key = f"{country}/{doc_type}"
         if cache_key not in self._schema_cache:
-            path = Path(f"configs/countries/{country}/doc_types/{doc_type}.yaml")
+            # Sanitize inputs to prevent path traversal
+            safe_country = _sanitize_path_component(country)
+            safe_doc_type = _sanitize_path_component(doc_type)
+            path = Path(f"configs/countries/{safe_country}/doc_types/{safe_doc_type}.yaml")
             if not path.exists():
                 # Fallback to defaults
-                path = Path(f"configs/countries/_defaults/doc_types/{doc_type}.yaml")
+                path = Path(f"configs/countries/_defaults/doc_types/{safe_doc_type}.yaml")
             with open(path) as f:
                 raw = yaml.safe_load(f)
             self._schema_cache[cache_key] = ExtractionSchema(
