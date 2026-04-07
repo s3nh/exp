@@ -1,5 +1,5 @@
-from __future__ import annotations
 """FastAPI endpoints for the analyst document review tool."""
+from __future__ import annotations
 
 import uuid
 from typing import Any

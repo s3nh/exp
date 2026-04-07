@@ -8,15 +8,13 @@ import yaml
 from core.case.case_context import (
     CaseContext,
     CaseStatus,
-    DocumentEntry,
     DocumentStatus,
     ClassificationResult,
     NEEDS_MANUAL_CLASSIFICATION,
     UNKNOWN_DOCUMENT_TYPE,
 )
-from core.case.dependency_graph import DocumentGraph, CompletenessChecker
 from core.classification.classifier import DocumentClassifier
-from core.conditions.checker import ConditionChecker, ConditionDefinition
+from core.conditions.checker import ConditionChecker
 from core.review.report_builder import ReviewReportBuilder
 from core.pipeline_engine import PipelineEngine, PipelineDefinition
 from core.prompt_compiler import PromptCompiler
