@@ -303,17 +303,24 @@ class CaseOrchestrator:
 
 
 def _load_process_config(path: str) -> dict[str, Any]:
-    """Load process config YAML, returning empty dict if not found."""
-    p = Path(path).resolve()
+    """Load process config YAML, returning empty dict if not found.
+
+    Validates the resolved path stays within the configs/ directory before
+    opening, preventing path traversal attacks.
+    """
     configs_base = Path("configs").resolve()
-    # Guard against path traversal attacks — use is_relative_to for robust check
-    if not p.is_relative_to(configs_base):
+    resolved = Path(path).resolve()
+    # Guard against path traversal — is_relative_to is robust against symlinks
+    # and OS-level tricks that str.startswith() would miss.
+    if not resolved.is_relative_to(configs_base):
         logger.warning("Process config path outside configs dir: %s", path)
         return {}
-    if not p.exists():
+    # Reuse the already-validated resolved Path object; never open the raw input
+    safe_path = resolved
+    if not safe_path.exists():
         logger.warning("Process config not found: %s", path)
         return {}
-    with open(p) as f:
+    with safe_path.open() as f:
         return yaml.safe_load(f) or {}
 
 
