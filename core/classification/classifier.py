@@ -1,5 +1,4 @@
 from __future__ import annotations
-import json
 import logging
 from pathlib import Path
 from typing import Any
@@ -10,6 +9,7 @@ from core.context import PipelineContext
 from core.guardrails.engine import GuardrailEngine
 from core.inference import InferenceRouter
 from core.prompt_compiler import PromptCompiler
+from core.utils import try_parse_json
 
 logger = logging.getLogger(__name__)
 
@@ -120,26 +120,15 @@ class DocumentClassifier:
         self, doc_id: str, response_text: str
     ) -> ClassificationResult:
         """Parse LLM JSON response into ClassificationResult."""
-        try:
-            text = response_text.strip()
-            if text.startswith("```"):
-                lines = text.splitlines()
-                start = 1
-                end = len(lines)
-                for i in range(len(lines) - 1, 0, -1):
-                    if lines[i].strip() == "```":
-                        end = i
-                        break
-                text = "\n".join(lines[start:end])
-            data = json.loads(text)
-        except json.JSONDecodeError as exc:
-            logger.warning("[%s] Failed to parse classification JSON: %s", doc_id, exc)
+        data, parse_error = try_parse_json(response_text)
+        if data is None:
+            logger.warning("[%s] Failed to parse classification JSON: %s", doc_id, parse_error)
             return ClassificationResult(
                 doc_id=doc_id,
                 detected_type=NEEDS_MANUAL,
                 confidence=0.0,
                 alternative_types=[],
-                reasoning=f"JSON parse error: {exc}. Raw: {response_text[:200]}",
+                reasoning=f"JSON parse error: {parse_error}. Raw: {response_text[:200]}",
             )
 
         detected_type: str = data.get("detected_type", NEEDS_MANUAL)

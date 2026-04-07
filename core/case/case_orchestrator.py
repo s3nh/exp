@@ -23,6 +23,7 @@ from core.prompt_compiler import PromptCompiler
 from core.inference import InferenceRouter
 from core.guardrails.engine import GuardrailEngine
 from core.context import PipelineContext
+from core.utils import sanitize_path_component
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,15 @@ class CaseOrchestrator:
                 continue
 
             try:
-                schema = self._compiler.load_schema(country, doc.doc_type)
+                safe_country = sanitize_path_component(country)
+                safe_doc_type = sanitize_path_component(doc.doc_type)
+                schema = self._compiler.load_schema(safe_country, safe_doc_type)
+            except ValueError as exc:
+                logger.warning(
+                    "[%s] Unsafe path component for doc %s: %s", case.case_id, doc_id, exc
+                )
+                doc.status = DocumentStatus.SKIPPED
+                continue
             except FileNotFoundError:
                 logger.warning(
                     "[%s] No schema for doc_type '%s' — skipping extraction of %s",

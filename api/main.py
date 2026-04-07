@@ -1,7 +1,9 @@
 from __future__ import annotations
 """FastAPI endpoints for the analyst document review tool."""
 
+import re
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, status
@@ -15,6 +17,13 @@ app = FastAPI(
 
 # In-memory case store (replace with DB in production)
 _cases: dict[str, dict[str, Any]] = {}
+
+# Allowed process config paths — prevents arbitrary file reads via the API
+_ALLOWED_PROCESS_CONFIGS: set[str] = {
+    "configs/countries/germany/process/consumer_credit.yaml",
+}
+
+_SAFE_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
 
 
 class CreateCaseRequest(BaseModel):
@@ -88,6 +97,13 @@ async def process_case(
 
     if case_id not in _cases:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+
+    if process_config not in _ALLOWED_PROCESS_CONFIGS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown process config '{process_config}'. "
+            f"Allowed values: {sorted(_ALLOWED_PROCESS_CONFIGS)}",
+        )
 
     case: CaseContext = _cases[case_id]["case"]
 

@@ -1,5 +1,4 @@
 from __future__ import annotations
-import json
 import logging
 import time
 from dataclasses import dataclass, field
@@ -11,6 +10,7 @@ from core.context import PipelineContext, StepTrace, StepStatus
 from core.guardrails.engine import GuardrailEngine
 from core.inference import InferenceRouter
 from core.prompt_compiler import PromptCompiler
+from core.utils import try_parse_json
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ class RetryController:
             response_text = guard_out.sanitized_text or raw_response
             last_raw = response_text
 
-            parsed, parse_error = _try_parse_json(response_text)
+            parsed, parse_error = try_parse_json(response_text)
             duration = (time.monotonic() - start) * 1000
 
             if parsed is not None:
@@ -288,23 +288,5 @@ class PipelineEngine:
         return context
 
 
-def _try_parse_json(text: str) -> tuple[dict[str, Any] | None, str]:
-    """Try to parse JSON from text, stripping markdown fences. Returns (parsed, error)."""
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        lines = cleaned.splitlines()
-        # Find the closing fence explicitly (may not be the last line)
-        start = 1
-        end = len(lines)
-        for i in range(len(lines) - 1, 0, -1):
-            if lines[i].strip() == "```":
-                end = i
-                break
-        cleaned = "\n".join(lines[start:end])
-    try:
-        result = json.loads(cleaned)
-        if isinstance(result, dict):
-            return result, ""
-        return None, f"Expected JSON object, got {type(result).__name__}"
-    except json.JSONDecodeError as exc:
-        return None, str(exc)
+# Re-export for backward compatibility; new code should import from core.utils
+_try_parse_json = try_parse_json

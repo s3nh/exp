@@ -17,7 +17,8 @@ from core.prompt_compiler import PromptCompiler
 
 logger = logging.getLogger(__name__)
 
-_SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
+_SEVERITY_ORDER: dict[str, int] = {"error": 0, "warning": 1, "info": 2}
+_DEFAULT_SEVERITY_RANK = len(_SEVERITY_ORDER)  # unknown severities sort last
 
 
 class ReviewReportBuilder:
@@ -53,7 +54,7 @@ class ReviewReportBuilder:
 
         flagged_issues = self._collect_flagged_issues(condition_results)
         flagged_issues.sort(
-            key=lambda x: _SEVERITY_ORDER.get(x.get("severity", "info"), 2)
+            key=lambda x: _SEVERITY_ORDER.get(x.get("severity", "info"), _DEFAULT_SEVERITY_RANK)
         )
 
         narrative_summary = await self._generate_narrative(

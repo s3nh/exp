@@ -1,8 +1,7 @@
 from __future__ import annotations
-import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Any
 import yaml
@@ -12,6 +11,7 @@ from core.context import PipelineContext
 from core.guardrails.engine import GuardrailEngine
 from core.inference import InferenceRouter
 from core.prompt_compiler import PromptCompiler
+from core.utils import try_parse_json
 
 logger = logging.getLogger(__name__)
 
@@ -223,12 +223,12 @@ class ConditionChecker:
             months = int(expected)
             try:
                 doc_date = _parse_date(value)
-                diff_months = (
-                    (today.year - doc_date.year) * 12
-                    + (today.month - doc_date.month)
-                )
-                passed = 0 <= diff_months <= months
-                return passed, f"Date {doc_date} is {diff_months} months ago (limit: {months})"
+                # Use day-accurate comparison: N months = N * 30 days (approximate)
+                # to avoid edge cases where calendar month counting misses freshness
+                cutoff = today - timedelta(days=months * 30)
+                passed = doc_date >= cutoff
+                days_old = (today - doc_date).days
+                return passed, f"Date {doc_date} is {days_old} days old (limit: {months * 30} days)"
             except ValueError as exc:
                 return False, f"Cannot parse date: {exc}"
 
@@ -342,24 +342,13 @@ class ConditionChecker:
         sources_used: list[str],
     ) -> ConditionCheckResult:
         """Parse LLM JSON response for a condition check."""
-        try:
-            text = response_text.strip()
-            if text.startswith("```"):
-                lines = text.splitlines()
-                start = 1
-                end = len(lines)
-                for i in range(len(lines) - 1, 0, -1):
-                    if lines[i].strip() == "```":
-                        end = i
-                        break
-                text = "\n".join(lines[start:end])
-            data = json.loads(text)
-        except json.JSONDecodeError as exc:
+        data, parse_error = try_parse_json(response_text)
+        if data is None:
             return ConditionCheckResult(
                 condition_name=condition.name,
                 status="needs_review",
                 severity=condition.severity,
-                analyst_message=f"Could not parse LLM response: {exc}",
+                analyst_message=f"Could not parse LLM response: {parse_error}",
                 details={"raw": response_text[:300]},
                 sources_used=sources_used,
                 check_type="llm_assisted",

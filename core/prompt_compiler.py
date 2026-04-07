@@ -6,14 +6,7 @@ from pathlib import Path
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-_SAFE_COMPONENT_RE = re.compile(r'^[a-zA-Z0-9_\-]+$')
-
-
-def _sanitize_path_component(value: str) -> str:
-    """Ensure a path component contains only safe characters (no traversal)."""
-    if not _SAFE_COMPONENT_RE.match(value):
-        raise ValueError(f"Unsafe path component: {value!r}")
-    return value
+from core.utils import sanitize_path_component as _sanitize_path_component
 
 
 @dataclass
