@@ -306,8 +306,8 @@ def _load_process_config(path: str) -> dict[str, Any]:
     """Load process config YAML, returning empty dict if not found."""
     p = Path(path).resolve()
     configs_base = Path("configs").resolve()
-    # Guard against path traversal attacks
-    if not str(p).startswith(str(configs_base)):
+    # Guard against path traversal attacks — use is_relative_to for robust check
+    if not p.is_relative_to(configs_base):
         logger.warning("Process config path outside configs dir: %s", path)
         return {}
     if not p.exists():

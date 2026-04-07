@@ -1,9 +1,7 @@
 from __future__ import annotations
 """FastAPI endpoints for the analyst document review tool."""
 
-import re
 import uuid
-from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, status
@@ -22,8 +20,6 @@ _cases: dict[str, dict[str, Any]] = {}
 _ALLOWED_PROCESS_CONFIGS: set[str] = {
     "configs/countries/germany/process/consumer_credit.yaml",
 }
-
-_SAFE_NAME_RE = re.compile(r"^[a-zA-Z0-9_]+$")
 
 
 class CreateCaseRequest(BaseModel):

@@ -223,12 +223,10 @@ class ConditionChecker:
             months = int(expected)
             try:
                 doc_date = _parse_date(value)
-                # Use day-accurate comparison: N months = N * 30 days (approximate)
-                # to avoid edge cases where calendar month counting misses freshness
-                cutoff = today - timedelta(days=months * 30)
+                cutoff = _months_ago(today, months)
                 passed = doc_date >= cutoff
                 days_old = (today - doc_date).days
-                return passed, f"Date {doc_date} is {days_old} days old (limit: {months * 30} days)"
+                return passed, f"Date {doc_date} is {days_old} days old (cutoff: {cutoff})"
             except ValueError as exc:
                 return False, f"Cannot parse date: {exc}"
 
@@ -380,3 +378,20 @@ def _parse_date(value: Any) -> date:
         except ValueError:
             continue
     raise ValueError(f"Cannot parse date: {s!r}")
+
+
+def _months_ago(ref: date, months: int) -> date:
+    """Return the calendar date that is exactly `months` calendar months before `ref`.
+
+    Uses calendar-accurate month arithmetic (handles month-end clamping),
+    e.g. 3 months before 2024-03-31 → 2024-12-31, not 2024-12-01.
+    """
+    import calendar
+    year = ref.year
+    month = ref.month - months
+    while month <= 0:
+        month += 12
+        year -= 1
+    # Clamp day to the last valid day of the target month
+    max_day = calendar.monthrange(year, month)[1]
+    return date(year, month, min(ref.day, max_day))
