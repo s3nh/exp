@@ -1,0 +1,36 @@
+conditions:
+  - name: salary_slip_freshness
+    description: "Salary slip must be no more than 3 months old"
+    applies_to: ["salary_slip"]
+    check_type: deterministic
+    logic:
+      field: pay_period
+      operator: within_months
+      value: 3
+    on_fail: needs_review
+    severity: warning
+    analyst_message: "Salary slip pay period '{pay_period}' may be outdated (>3 months)"
+
+  - name: bank_statement_freshness
+    description: "Bank statement must be no more than 3 months old"
+    applies_to: ["bank_statement"]
+    check_type: deterministic
+    logic:
+      field: statement_date
+      operator: within_months
+      value: 3
+    on_fail: needs_review
+    severity: warning
+    analyst_message: "Bank statement date '{statement_date}' may be outdated (>3 months)"
+
+  - name: identity_document_validity
+    description: "Identity document must not be expired"
+    applies_to: ["identity_document"]
+    check_type: deterministic
+    logic:
+      field: expiry_date
+      operator: after_today
+      value: null
+    on_fail: fail
+    severity: error
+    analyst_message: "Identity document expiry date '{expiry_date}' has passed"

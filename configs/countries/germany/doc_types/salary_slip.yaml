@@ -1,0 +1,41 @@
+schema_version: "1.0"
+country: DE
+business_unit: retail_credit
+document_type: salary_slip
+fields:
+  - name: employer_name
+    type: string
+    required: true
+    alias: ["Arbeitgeber", "Unternehmen", "Firma"]
+  - name: employee_name
+    type: string
+    required: true
+    alias: ["Arbeitnehmer", "Name des Mitarbeiters", "Mitarbeiter"]
+  - name: pay_period
+    type: string
+    required: true
+    alias: ["Abrechnungszeitraum", "Monat", "Zeitraum", "Abrechnungsmonat"]
+  - name: payment_date
+    type: string
+    alias: ["Zahlungsdatum", "Zahldatum", "Auszahlungsdatum"]
+  - name: gross_salary
+    type: float
+    alias: ["Bruttolohn", "Bruttogehalt", "Bruttobezüge", "Gesamtbrutto"]
+    currency: EUR
+  - name: net_salary
+    type: float
+    required: true
+    alias: ["Nettolohn", "Nettogehalt", "Auszahlungsbetrag", "Nettobezug"]
+    currency: EUR
+  - name: tax_deduction
+    type: float
+    alias: ["Lohnsteuer", "Einkommensteuer", "Steuerabzug"]
+    currency: EUR
+  - name: social_insurance_deduction
+    type: float
+    alias: ["Sozialversicherung", "SV-Beiträge", "Sozialabgaben"]
+    currency: EUR
+  - name: employment_type
+    type: string
+    alias: ["Beschäftigungsart", "Beschäftigungsverhältnis", "Vertragsart"]
+rules: []

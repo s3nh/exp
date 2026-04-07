@@ -54,8 +54,8 @@ class GoogleGenAIBackend(LLMBackend):
 class InferenceRouter:
     """Route to the right backend based on country/config policy."""
 
-    def __init__(self, backends: dict[str, LLMBackend]):
-        self._backends = backends
+    def __init__(self, backends: dict[str, LLMBackend] | None = None):
+        self._backends: dict[str, LLMBackend] = backends or {}
 
     async def run(
         self, prompt: str, backend_key: str = "default", **kwargs
@@ -68,3 +68,15 @@ class InferenceRouter:
     ) -> str:
         """Return raw string response without JSON parsing."""
         return await self._backends[backend_key].generate(prompt, **kwargs)
+
+    async def generate(
+        self,
+        prompt: str,
+        temperature: float = 0.0,
+        backend_key: str = "default",
+        **kwargs,
+    ) -> str:
+        """Convenience wrapper around run_raw for use by new pipeline components."""
+        return await self.run_raw(
+            prompt, backend_key=backend_key, temperature=temperature, **kwargs
+        )

@@ -1,0 +1,23 @@
+You are an analyst assistant checking a document condition.
+
+## Condition
+**Name**: {{ condition.name }}
+**Description**: {{ condition.description }}
+{% if condition.llm_logic %}**Logic**: {{ condition.llm_logic }}{% endif %}
+
+## Relevant Document Data
+{% for doc_type, docs in relevant_data.items() %}
+### {{ doc_type }}
+{% for doc in docs %}
+- Document {{ doc.doc_id }}: {{ doc | tojson }}
+{% endfor %}
+{% endfor %}
+
+## Instructions
+Check whether the condition is satisfied by the document data.
+Respond with a JSON object ONLY:
+{
+  "status": "pass" | "fail" | "needs_review",
+  "analyst_message": "<clear message for the analyst>",
+  "details": { "<any relevant details>" }
+}

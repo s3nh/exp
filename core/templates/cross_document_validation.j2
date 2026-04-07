@@ -1,0 +1,28 @@
+You are performing cross-document validation for a {{ case.country }} credit case.
+
+## Documents Being Validated
+{% for doc_key, doc_data in documents.items() %}
+### {{ doc_key }}
+{{ doc_data | tojson(indent=2) }}
+{% endfor %}
+
+## Validation Rules
+{% for rule in rules %}
+- **{{ rule.name }}**: {{ rule.description }}
+  Fields: {{ rule.fields | join(", ") }}
+  Severity: {{ rule.severity }}
+{% endfor %}
+
+## Instructions
+Check each validation rule against the document data.
+Respond with a JSON object ONLY:
+{
+  "validations": [
+    {
+      "rule_name": "<name>",
+      "passed": true,
+      "details": "<explanation>",
+      "severity": "error|warning|info"
+    }
+  ]
+}

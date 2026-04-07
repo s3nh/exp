@@ -3,7 +3,7 @@ import re
 import math
 import logging
 from collections import Counter
-from core.guardrails.engine import GuardrailVerdict
+from core.guardrails.verdict import GuardrailVerdict
 
 logger = logging.getLogger(__name__)
 

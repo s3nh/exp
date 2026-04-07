@@ -1,0 +1,36 @@
+You are a precise document data extraction assistant for {{ schema.country }} {{ schema.document_type }} documents.
+
+## Fields to Extract
+{% for field in extraction_fields %}
+- **{{ field.name }}** ({{ field.type }}{% if field.required %}, REQUIRED{% endif %}{% if field.alias %}, aliases: {{ field.alias | join("/") }}{% endif %})
+{% endfor %}
+{% if reasoning_fields %}
+
+## Fields Requiring Reasoning
+{% for field in reasoning_fields %}
+- **{{ field.name }}**: {{ field.reasoning }}
+{% endfor %}
+{% endif %}
+
+{% if rules %}
+## Validation Rules
+{% for rule in rules %}
+- {{ rule.condition }}: {{ rule.action }} (severity: {{ rule.severity }})
+{% endfor %}
+{% endif %}
+
+{% if context %}
+## Context from Previous Steps
+{% for key, value in context.items() %}
+- {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+
+## Document
+```
+{{ document_text }}
+```
+
+## Instructions
+Extract all fields from the document. Use null for missing required fields.
+Return a JSON object ONLY with field names as keys.

@@ -1,0 +1,40 @@
+schema_version: "1.0"
+country: DE
+business_unit: retail_credit
+document_type: tax_return
+fields:
+  - name: taxpayer_name
+    type: string
+    required: true
+    alias: ["Steuerpflichtiger", "Name"]
+  - name: tax_number
+    type: string
+    alias: ["Steuernummer"]
+  - name: assessment_year
+    type: string
+    required: true
+    alias: ["Veranlagungsjahr", "Jahr"]
+  - name: tax_office
+    type: string
+    alias: ["Finanzamt"]
+  - name: total_income
+    type: float
+    required: true
+    alias: ["Gesamteinkünfte", "Zu versteuerndes Einkommen"]
+    currency: EUR
+  - name: income_from_employment
+    type: float
+    alias: ["Einkünfte aus nichtselbständiger Arbeit"]
+    currency: EUR
+  - name: income_from_self_employment
+    type: float
+    alias: ["Einkünfte aus selbständiger Arbeit"]
+    currency: EUR
+  - name: assessed_tax
+    type: float
+    alias: ["Festgesetzte Einkommensteuer"]
+    currency: EUR
+  - name: document_date
+    type: string
+    alias: ["Datum", "Ausstellungsdatum"]
+rules: []

@@ -1,0 +1,24 @@
+conditions:
+  - name: income_consistency
+    description: "Income declared on loan application should be consistent with salary slip"
+    applies_to: []
+    check_type: llm_assisted
+    sources: ["salary_slip", "loan_application"]
+    llm_logic: >
+      Compare declared_monthly_income in loan_application with net_salary in salary_slip.
+      Flag if the difference exceeds 20%.
+    on_fail: needs_review
+    severity: warning
+    analyst_message: "Income figures between application and salary slip may be inconsistent"
+
+  - name: applicant_name_consistency
+    description: "Applicant name should match across documents"
+    applies_to: []
+    check_type: llm_assisted
+    sources: ["loan_application", "identity_document"]
+    llm_logic: >
+      Verify that applicant_name in loan_application matches last_name and first_name
+      in identity_document (allow for minor formatting differences).
+    on_fail: needs_review
+    severity: error
+    analyst_message: "Applicant name mismatch between loan application and identity document"

@@ -2,7 +2,7 @@ from __future__ import annotations
 import re
 import logging
 from typing import Any
-from core.guardrails.engine import GuardrailVerdict
+from core.guardrails.verdict import GuardrailVerdict
 
 logger = logging.getLogger(__name__)
 

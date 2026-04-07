@@ -1,0 +1,22 @@
+input_guards:
+  max_prompt_length: 32000
+  require_document_hash_match: false
+  blocked_content_patterns:
+    - "ignore previous instructions"
+    - "you are now"
+    - "pretend you are"
+    - "act as if"
+
+output_guards:
+  max_response_length: 10000
+  must_be_valid_json: false
+  block_if_contains:
+    - "APPROVE THE LOAN"
+    - "REJECT THE APPLICATION"
+    - "CREDIT IS DENIED"
+    - "CREDIT IS GRANTED"
+
+pii:
+  scan_input: false
+  scan_output: false
+  action: "redact"

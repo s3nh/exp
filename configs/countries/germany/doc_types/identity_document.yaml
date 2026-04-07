@@ -1,0 +1,41 @@
+schema_version: "1.0"
+country: DE
+business_unit: retail_credit
+document_type: identity_document
+fields:
+  - name: document_type_detail
+    type: string
+    alias: ["Dokumenttyp", "Art"]
+  - name: document_number
+    type: string
+    required: true
+    alias: ["Ausweisnummer", "Personalausweisnummer", "Reisepassnummer"]
+  - name: last_name
+    type: string
+    required: true
+    alias: ["Nachname", "Familienname"]
+  - name: first_name
+    type: string
+    required: true
+    alias: ["Vorname"]
+  - name: date_of_birth
+    type: string
+    required: true
+    alias: ["Geburtsdatum"]
+  - name: nationality
+    type: string
+    alias: ["Staatsangehörigkeit", "Nationalität"]
+  - name: issue_date
+    type: string
+    alias: ["Ausstellungsdatum", "Ausgestellt am"]
+  - name: expiry_date
+    type: string
+    required: true
+    alias: ["Ablaufdatum", "Gültig bis"]
+  - name: issuing_authority
+    type: string
+    alias: ["Ausstellende Behörde", "Ausstellungsbehörde"]
+rules:
+  - condition: "expiry_date < today"
+    action: "flag_for_review"
+    severity: error
